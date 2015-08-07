@@ -249,7 +249,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				$scope.selectedType = store.get('netease.setType')
 				$scope.index = Object.keys($scope.type).indexOf($scope.selectedType)
 				restful.post({
-					s: encodeURIComponent($scope.searchItem),
+					s: $scope.searchItem,
 					type: $scope.selectedType
 				}).then(function(resp) {
 					$scope.result = resp

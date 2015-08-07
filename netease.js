@@ -116,6 +116,9 @@ router.get('/api/song', song)
     .get('/', function*() {
         this.body = yield this.render('index')
     })
+    .get('/test', function*() {
+        this.body = require('request')('http://m1.music.126.net/xTVT2QrGU8tttp0Apfgxqg==/5662484883124265.mp3')
+    })
 
 
 app.listen(9527)
