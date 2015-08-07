@@ -1,16 +1,11 @@
 {
-  "name": "netease",
-  "version": "1.0.0",
+  "name": "neteaseMusic",
+  "version": "0.0.0",
+  "homepage": "https://github.com/otarim/neteaseMusic",
   "authors": [
     "otarim <otarim.com@gmail.com>"
   ],
-  "main": "index.html",
-  "keywords": [
-    "netease",
-    "otarim"
-  ],
   "license": "MIT",
-  "homepage": "http://www.otarim.com",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -19,9 +14,8 @@
     "tests"
   ],
   "dependencies": {
-    "angular-resource": "~1.3.11",
-    "angular-route": "~1.3.10",
-    "restangular": "~1.4.0",
-    "angular-touch": "~1.3.11"
+    "angular": "~1.4.3",
+    "restangular": "~1.5.1",
+    "angular-route": "~1.4.3"
   }
 }
