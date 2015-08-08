@@ -36,9 +36,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 
 		return function(type, $scope) {
 			var url = '/api/' + type + '?' + type + '='
-				// var restful = Restangular.all(type),
-				// 	queryParamas = {} 
-				// queryParamas[type] = $routeParams.id
 			$scope.song = song
 			$scope.changeRoute = changeRoute
 			$http.get(url + $routeParams.id).success(function(d) {
@@ -46,6 +43,11 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 					$scope.data = d.result
 				} else {
 					$scope.data = d
+				}
+				if (type === 'user') {
+					$scope.more = d.more
+					$scope['playlist'] = d.playlist
+					$scope.offset = d.playlist.length
 				}
 				$scope.toggleOrder = function(type) {
 					if ($scope.order === type) {
@@ -63,14 +65,41 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			$scope.selectSong = function(index) {
 				$scope.index = index
 			}
-			if (type === 'artist') {
-				var api = Restangular.all('/artist/albums')
-				api.get('', {
-					id: $routeParams.id,
-					offset: 0
-				}).then(function(result) {
-					$scope.hotAlbums = result.hotAlbums
-				})
+			if (type === 'artist' || type === 'user') {
+				var prop
+				var api = type === 'artist' ? Restangular.all('/artist/albums') : Restangular.all('/user')
+				var fetch = function(cb) {
+					var params = {
+						offset: $scope.offset,
+						limit: 10
+					}
+					if (type === 'artist') {
+						params['id'] = $routeParams.id
+					} else {
+						params['user'] = $routeParams.id
+					}
+					api.get('', params).then(function(result) {
+						cb && cb(result)
+					})
+				}
+				$scope.offset = 0
+				$scope.loadMore = function() {
+					fetch(function(result) {
+						$scope.more = result.more
+						$scope[prop] = $scope[prop].concat(result[prop])
+						$scope.offset += result[prop].length
+					})
+				}
+				if (type === 'artist') {
+					prop = 'hotAlbums'
+					fetch(function(result) {
+						$scope.more = result.more
+						$scope[prop] = result[prop]
+						$scope.offset += result[prop].length
+					})
+				} else {
+					prop = 'playlist'
+				}
 			}
 		}
 	}
@@ -198,7 +227,8 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 						restful.post({
 							s: $scope.searchItem,
 							type: $scope.selectedType,
-							offset: $scope.offset
+							offset: $scope.offset,
+							limit: 20
 						}).then(function(resp) {
 							var type = alias[$scope.selectedType]
 							cb && cb(resp.result, type)
@@ -211,7 +241,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					10: 'album',
 					100: 'artist',
 					1000: 'playlist',
-					1002: 'user'
+					1002: 'userprofile'
 				}
 				$scope.data = {}
 				$scope.type = type
@@ -228,21 +258,24 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				$scope.search = function() {
 					if ($scope.searchItem) {
 						$scope.data = []
-						$scope.offset = 1
+						$scope.offset = 0
 						store.add('netease.searchItem', $scope.searchItem)
 						postRequest(function(resp, type) {
 							$scope.data[type + 'Count'] = resp[type + 'Count']
 							$scope.data[type + 's'] = resp[type + 's']
+							$scope.offset += resp[type + 's'].length
+							$scope.more = $scope.offset < resp[type + 'Count']
 						})
 					} else {
 						searchBar.focus()
 					}
 				}
 				$scope.loadMore = function() {
-					$scope.offset += 1
 					postRequest(function(resp, type) {
-						$scope.data[type + 'Count'] += resp[type + 'Count']
+						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = $scope.data[type + 's'].concat(resp[type + 's'])
+						$scope.offset += resp[type + 's'].length
+						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
 				$scope.play = function(id, index) {
@@ -264,6 +297,8 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					postRequest(function(resp, type) {
 						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = resp[type + 's']
+						$scope.offset += resp[type + 's'].length
+						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
 			}],

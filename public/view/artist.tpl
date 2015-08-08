@@ -13,7 +13,6 @@
 		</li>
 		<li ng-repeat="(key, value) in data.hotSongs | orderBy: order: rev" ng-dblclick="play(value,$index)" ng-click="selectSong($index)" ng-class="{active: index === $index,odd: $odd}">
 			<span class="song-index">{{$index+1}}</span><span class="song-title">{{value.name}}</span><span class="song-album" ng-click="changeRoute('album',{id: value.album.id})">{{value.album.name}}</span><span class="song-time">{{value.duration|formatTime}}</span><span class="song-score"><i><b ng-style="{width: value.score+'%'}"></b></i></span>
-			<i class="song-progress" ng-if="nowPlay === $index" style="-webkit-animation-duration: {{value.duration|getDuration}}s" ng-style="{'-webkit-animation-play-state': song.paused() ? 'paused':'running'}"></i>
 		</li>
 	</ul>
 	<h4>热门专辑:</h4>
@@ -24,4 +23,5 @@
 			<span class="album-des"><h6 ng-bind="value.name" ng-click="changeRoute('album',{id: value.id})"></h6><p ng-click="changeRoute('artist',{id: value.artist.id})">{{value.artist.name}}</p></span>
 		</li>
 	</ul>
+	<div class="loadmore" ng-click="loadMore()" ng-if="more">加载更多</div>
 </div>

@@ -24,7 +24,6 @@
 		<p ng-if="data.userprofileCount" class="result-count">
 			共找到{{data.userprofileCount}}个用户
 		</p>
-		<p ng-click="loadMore()">loadMore</p>
 		<ul ng-class="{artists: data.artistCount,albums: data.albumCount,songs: data.songCount,'content-songs': data.songCount,playlist: data.playlistCount,users: data.userprofileCount}">
 			<li ng-if="data.artistCount" ng-repeat="(key, value) in data.artists" data-id="{{value.id}}" ng-click="changeRoute('artist',{id: value.id})">
 				<img ng-src="{{value.img1v1 === -1 ? value.img1v1Url : value.picUrl}}" alt="{{value.name}}" width="120" height="120">
@@ -52,5 +51,6 @@
 				<i class="song-progress" ng-if="nowPlay === $index" style="-webkit-animation-duration: {{value.duration|getDuration}}s" ng-style="{'-webkit-animation-play-state': song.paused() ? 'paused':'running'}"></i>
 			</li>
 		</ul>
+		<div class="loadmore" ng-click="loadMore()" ng-if="more">加载更多</div>
 	</div>
 </div>

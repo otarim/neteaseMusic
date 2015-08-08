@@ -86,6 +86,8 @@ footer {padding: 30px;}
 .user .header-info .desc {background: rgba(0,0,0,.6);position: absolute;left: 0;bottom: 0;width: 100%;}
 .user .header-info h2 {border-bottom-color: rgba(255,255,255,.8);}
 .user .header-info h2,.user .header-info p {color: #fff;}
+.loadmore {height: .4rem;line-height: .4rem;margin: .1rem .2rem;background: #e5e5e5;color: #555;text-align: center;display: block;cursor: pointer;}
+.loadmore:hover {background: #ddd;}
 @-webkit-keyframes progress {
 	from { width: 0; }
 	to { width: 100%; }
