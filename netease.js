@@ -27,17 +27,17 @@ var search = function*() {
         's': body.s,
         'type': body.type || 1,
         'offset': body.offset || 0,
-        'total': body.total || true,
+        'total': 'false',
         'limit': 60
     })
 }
 
-var userList = function*() {
+var user = function*() {
     var query = this.request.query
     this.body = yield request('/api/user/playlist', 'get', {
-        offset: query.offset,
-        limit: query.limit,
-        uid: query.uid
+        offset: query.offset || 1,
+        limit: query.limit || 60,
+        uid: query.user
     })
 }
 
@@ -52,21 +52,29 @@ var album = function*() {
     this.body = yield request('/api/album/' + query.album, 'get')
 }
 
+// var playList = function*() {
+//     var query = this.request.query
+//     this.body = yield request('/api/playlist/list', 'get', {
+//         cat: query.category,
+//         order: query.order || 'hot',
+//         offset: query.offset || 0,
+//         total: !!query.offset,
+//         limit: query.limit || 60
+//     })
+// }
+
 var playList = function*() {
     var query = this.request.query
-    this.body = yield request('/api/playlist/list', 'get', {
-        cat: query.category,
-        order: query.order,
-        offset: query.offset,
-        total: !!query.offset,
-        limit: query.limit
+    this.body = yield request('/api/playlist/detail', 'get', {
+        id: query.playList
     })
 }
 
-var playListDetail = function*() {
+var getArtistAlbum = function*() {
     var query = this.request.query
-    this.body = yield request('/api/playlist/detail', 'get', {
-        id: query.id
+    this.body = yield request('/api/artist/albums/' + query.id, 'get', {
+        offset: query.offset || 0,
+        limit: 60
     })
 }
 
@@ -108,17 +116,18 @@ app.use(router.routes()).use(router.allowedMethods())
 
 router.get('/api/song', song)
     .post('/api/search', search)
-    .get('/api/userList', userList)
+    .get('/api/user', user)
     .get('/api/artist', artist)
     .get('/api/album', album)
     .get('/api/playList', playList)
-    .get('/api/playListDetail', playListDetail)
+    // .get('/api/playListDetail', playListDetail)
     .get('/', function*() {
         this.body = yield this.render('index')
     })
     .get('/test', function*() {
         this.body = require('request')('http://m1.music.126.net/xTVT2QrGU8tttp0Apfgxqg==/5662484883124265.mp3')
     })
+    .get('/api/artist/albums', getArtistAlbum)
 
 
 app.listen(9527)

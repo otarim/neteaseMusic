@@ -27,7 +27,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 	}
 }).provider('songListController', function() {
 	// $scope,$http,$routeParams,song,changeRoute
-	this.$get = function($http, $routeParams, song, changeRoute, musicboxData) {
+	this.$get = function($http, $routeParams, song, changeRoute, musicboxData, Restangular) {
 		// $get 接受依赖列表
 		// $scope 仅仅存在 controller 中
 		// provider 可以在 config 里面预定义
@@ -42,11 +42,18 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			$scope.song = song
 			$scope.changeRoute = changeRoute
 			$http.get(url + $routeParams.id).success(function(d) {
+				if (type === 'playList') {
+					$scope.data = d.result
+				} else {
 					$scope.data = d
-				})
-				// restful.getList().then(function(resp){
-				// 	console.log(resp)
-				// })
+				}
+				$scope.toggleOrder = function(type) {
+					if ($scope.order === type) {
+						$scope.rev = !$scope.rev
+					}
+					$scope.order = type
+				}
+			})
 			$scope.play = function(music, index) {
 				// music.mp3Url = music.mp3Url.replace('m1','m2')
 				if (song.nowPlaying !== music.mp3Url) {
@@ -55,6 +62,15 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			}
 			$scope.selectSong = function(index) {
 				$scope.index = index
+			}
+			if (type === 'artist') {
+				var api = Restangular.all('/artist/albums')
+				api.get('', {
+					id: $routeParams.id,
+					offset: 0
+				}).then(function(result) {
+					$scope.hotAlbums = result.hotAlbums
+				})
 			}
 		}
 	}
@@ -67,6 +83,12 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				break
 			case 'album':
 				url = 'album/' + query.id
+				break
+			case 'playList':
+				url = 'playList/' + query.id
+				break
+			case 'user':
+				url = 'user/' + query.id
 				break
 			case 'song':
 		}
@@ -85,20 +107,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 		},
 		get: function(key) {
 			return localStorage.getItem(key)
-		}
-	}
-}).factory('interceptor', function($q) {
-	// http拦截器
-	return {
-		request: function(config) {
-			return config
-		},
-		response: function(response) {
-			console.log(response)
-			return response
-		},
-		responseError: function(err) {
-
 		}
 	}
 }).factory('global', function() {
@@ -179,108 +187,121 @@ app.filter('formatTime', function() {
 
 app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songListControllerProvider', 'RestangularProvider', function($routeProvider, $httpProvider, $sceDelegateProvider, songListControllerProvider, RestangularProvider) {
 	$httpProvider.defaults.cache = true //默认全局 cache: true
-		// $httpProvider.defaults.headers[method]
-		// $httpProvider.defaults.headers.post['X-POWER'] = 'otarim'
-		// $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-	$httpProvider.interceptors.push('interceptor')
-		// RestangularProvider.setBaseUrl('http://127.0.0.1:9527/')
-		// $sceDelegateProvider.resourceUrlWhitelist([
-		// 	'http://7vilgy.com1.z0.glb.clouddn.com/**'
-		// ])
-		// 添加跨域白名单
-		// songListControllerProvider.url = 'http://127.0.0.1:9527/'
 	$routeProvider.when('/', {
-		templateUrl: '/view/index.tpl',
-		controller: ['$scope', '$http', 'type', 'Restangular', 'song', 'changeRoute', 'store', 'global', 'musicboxData', function($scope, $http, type, Restangular, song, changeRoute, store, global, musicboxData) {
-			global.toggle()
-			var url,
-				searchBar = document.querySelector('.search-handler input')
-				// var restful = $resource('http://127.0.0.1:9527/:action',{
-				// 	action: '@action',
-				// },{
-				// 	// 配置$resource
-				// 	init: {
-				// 		method: 'POST',
-				// 		success: function(resp){
-				// 			$scope.result = resp
-				// 		}
-				// 	}
-				// })
-			var restful = Restangular.all('search')
-			$scope.type = type
-			$scope.selectedType = 1
-			$scope.index = $scope.select = 0
-			$scope.changeRoute = changeRoute
-			$scope.setType = function(type, index) {
-				$scope.index = index
-				$scope.selectedType = type
-				store.add('netease.setType', type)
-				searchBar.focus()
-			}
-			$scope.search = function() {
-				if ($scope.searchItem) {
-					store.add('netease.searchItem', $scope.searchItem)
-					restful.post({
-						s: $scope.searchItem,
-						type: $scope.selectedType
-					}).then(function(resp) {
-						$scope.result = resp
-						global.reset()
-					}, function(err) {
-						console.log(err)
-					})
-				} else {
+			templateUrl: '/view/index.tpl',
+			controller: ['$scope', '$http', 'type', 'Restangular', 'song', 'changeRoute', 'store', 'global', 'musicboxData', function($scope, $http, type, Restangular, song, changeRoute, store, global, musicboxData) {
+				global.toggle()
+				var url,
+					searchBar = document.querySelector('.search-handler input'),
+					postRequest = function(cb) {
+						var restful = Restangular.all('search')
+						restful.post({
+							s: $scope.searchItem,
+							type: $scope.selectedType,
+							offset: $scope.offset
+						}).then(function(resp) {
+							var type = alias[$scope.selectedType]
+							cb && cb(resp.result, type)
+						}, function(err) {
+							console.log(err)
+						})
+					}
+				var alias = {
+					1: 'song',
+					10: 'album',
+					100: 'artist',
+					1000: 'playlist',
+					1002: 'user'
+				}
+				$scope.data = {}
+				$scope.type = type
+				$scope.selectedType = 1
+				$scope.index = $scope.select = 0
+				$scope.offset = 0
+				$scope.changeRoute = changeRoute
+				$scope.setType = function(type, index) {
+					$scope.index = index
+					$scope.selectedType = type
+					store.add('netease.setType', type)
 					searchBar.focus()
 				}
-			}
-			$scope.play = function(id, index) {
-				$http.get('/song?id=' + id).success(function(d) {
-					// d.songs[0].mp3Url = d.songs[0].mp3Url.replace('m1','m2')
-					if (song.nowPlaying !== d.songs[0].mp3Url) {
-						musicboxData.add(d.songs[0])
+				$scope.search = function() {
+					if ($scope.searchItem) {
+						$scope.data = []
+						$scope.offset = 1
+						store.add('netease.searchItem', $scope.searchItem)
+						postRequest(function(resp, type) {
+							$scope.data[type + 'Count'] = resp[type + 'Count']
+							$scope.data[type + 's'] = resp[type + 's']
+						})
+					} else {
+						searchBar.focus()
 					}
-				})
-			}
-			$scope.selectSong = function(index) {
-				$scope.select = index
-			}
-			if (store.has('netease.searchItem')) {
-				$scope.searchItem = store.get('netease.searchItem')
-				$scope.selectedType = store.get('netease.setType')
-				$scope.index = Object.keys($scope.type).indexOf($scope.selectedType)
-				restful.post({
-					s: $scope.searchItem,
-					type: $scope.selectedType
-				}).then(function(resp) {
-					$scope.result = resp
-					global.reset()
-				}, function(err) {
-					console.log(err)
-				})
-			}
-		}],
-		resolve: {
-			// 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)* must be fn
-			type: function() {
-				return {
-					1: '单曲',
-					10: '专辑',
-					100: '歌手',
-					// 1000: '歌单'
+				}
+				$scope.loadMore = function() {
+					$scope.offset += 1
+					postRequest(function(resp, type) {
+						$scope.data[type + 'Count'] += resp[type + 'Count']
+						$scope.data[type + 's'] = $scope.data[type + 's'].concat(resp[type + 's'])
+					})
+				}
+				$scope.play = function(id, index) {
+					$http.get('/api/song?id=' + id).success(function(d) {
+						// d.songs[0].mp3Url = d.songs[0].mp3Url.replace('m1','m2')
+						if (song.nowPlaying !== d.songs[0].mp3Url) {
+							musicboxData.add(d.songs[0])
+						}
+					})
+				}
+				$scope.selectSong = function(index) {
+					$scope.select = index
+				}
+				global.reset()
+				if (store.has('netease.searchItem')) {
+					$scope.searchItem = store.get('netease.searchItem')
+					$scope.selectedType = store.get('netease.setType')
+					$scope.index = Object.keys($scope.type).indexOf($scope.selectedType)
+					postRequest(function(resp, type) {
+						$scope.data[type + 'Count'] = resp[type + 'Count']
+						$scope.data[type + 's'] = resp[type + 's']
+					})
+				}
+			}],
+			resolve: {
+				// 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)* must be fn
+				type: function() {
+					return {
+						1: '单曲',
+						10: '专辑',
+						100: '歌手',
+						1000: '歌单',
+						1002: '用户'
+					}
 				}
 			}
-		}
-	}).when('/artist/:id', {
-		templateUrl: '/view/artist.tpl',
-		controller: ['songListController', '$scope', function(songListController, $scope) {
-			songListController('artist', $scope)
-		}]
-	}).when('/album/:id', {
-		templateUrl: '/view/album.tpl',
-		controller: ['songListController', '$scope', function(songListController, $scope) {
-			songListController('album', $scope)
-		}]
-	})
+		}).when('/artist/:id', {
+			templateUrl: '/view/artist.tpl',
+			controller: ['songListController', '$scope', function(songListController, $scope) {
+				songListController('artist', $scope)
+			}]
+		}).when('/album/:id', {
+			templateUrl: '/view/album.tpl',
+			controller: ['songListController', '$scope', function(songListController, $scope) {
+				songListController('album', $scope)
+			}]
+		})
+		.when('/playList/:id', {
+			templateUrl: '/view/playList.tpl',
+			controller: ['songListController', '$scope', function(songListController, $scope) {
+				songListController('playList', $scope)
+			}]
+		})
+		.when('/user/:id', {
+			templateUrl: '/view/user.tpl',
+			controller: ['songListController', '$scope', function(songListController, $scope) {
+				songListController('user', $scope)
+			}]
+		})
 }]).controller('main', ['$scope', 'global', function($scope, global) {
 	$scope.global = global.getValue()
 }]).directive('musicbox', ['song', 'musicboxData', function(song, musicboxData) {
@@ -327,8 +348,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 	}
 }]).run(['$rootScope', 'global', function($rootScope, global) {
 	$rootScope.$on('$routeChangeStart', function(evt, next, current) {
+		console.log(current)
 		global.reset()
 	})
 }])
-
-// document.onselectstart = function(){return false}
