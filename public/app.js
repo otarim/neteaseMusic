@@ -23,6 +23,11 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			} else {
 				audio.pause()
 			}
+		},
+		onEnd: function(cb) {
+			audio.addEventListener('ended', function() {
+				cb()
+			})
 		}
 	}
 }).provider('songListController', function() {
@@ -61,6 +66,9 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				if (song.nowPlaying !== music.mp3Url) {
 					musicboxData.add(music)
 				}
+			}
+			$scope.playAll = function(lists) {
+				musicboxData.addPlayList(lists)
 			}
 			$scope.selectSong = function(index) {
 				$scope.index = index
@@ -175,6 +183,11 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			index: -1
 		}
 	}
+	song.onEnd(function() {
+		if (data.curIndex < data.playList.length) {
+			song.play(data.playList[++data.curIndex].url)
+		}
+	})
 	return {
 		add: function(music) {
 			var m = {
@@ -192,6 +205,24 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			store[m.name] = m.url
 			song.play(m.url)
 			return data
+		},
+		addPlayList: function(lists) {
+			lists = lists.map(function(music) {
+				return {
+					name: music.name,
+					url: music.mp3Url || music.url,
+					duration: music.duration
+				}
+			})
+			data.playList = data.playList.concat(lists)
+		},
+		next: function() {
+			if (data.curIndex < data.playList.length) {
+				var nextSong = data.playList[++data.curIndex]
+				song.play(nextSong.url)
+				data.playing = nextSong.name
+				data.play = true
+			}
 		},
 		getData: function() {
 			return data
@@ -365,6 +396,9 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 			}
 			$scope.showList = function() {
 				$scope.list = !$scope.list
+			}
+			$scope.playNext = function() {
+				musicboxData.next()
 			}
 		},
 		// require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
