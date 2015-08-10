@@ -12,6 +12,10 @@
 2. 支持歌曲清单
 3. 更多功能持续开发中
 
+**使用**
+
+`npm install` + `bower install` 安装所需的第三方依赖, `npm start` 启动 app,默认监听 `9527` 端口
+
 **截图**
 
 ![http://ww4.sinaimg.cn/large/9bfe0b14jw1euxy7qw3fuj21kw0zatnf.jpg](http://ww4.sinaimg.cn/large/9bfe0b14jw1euxy7qw3fuj21kw0zatnf.jpg)
