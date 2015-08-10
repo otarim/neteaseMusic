@@ -19,6 +19,7 @@ footer {padding: 30px;}
 .search-handler input {width: 60%;height: 38px;line-height: 38px;box-sizing: border-box;}
 .search-handler input,.search-handler button {vertical-align: middle;}
 .blank {border-color: red;box-shadow: 0 0 .05rem red;}
+.blankResult,.searching {font-size: .2rem;padding: .2rem;}
 .result {background: rgba(180,180,180,.1);border-radius: 10px;margin: 20px 0;padding-bottom: 10px;box-shadow: 0 0 120px rgba(180,180,180,.8);}
 .result-count {padding: 5px;background: #E91E63;color: #fff;}
 .result .caption {background: #01579b;}
@@ -103,10 +104,13 @@ footer {padding: 30px;}
 .songs .song-title,.songs .song-album {width: 30%; cursor: pointer;} 
 .songs .song-time {width: 10%;}
 .songs .song-artist {width: 20%;cursor: pointer;}
-.widget {position: fixed;bottom: 10px;left: -250px;transition: .5s;width: 250px;}
+.widget {position: fixed;bottom: 10px;left: -250px;transition: .5s;width: 250px;-webkit-filter: drop-shadow(0 0 5px rgba(0,0,0,.4));}
+.widget-albumPic {width: 250px;height: 250px;background: #555 url(/blankAlbum.png) no-repeat center center/contain;overflow: hidden;}
+.widget-albumPic img {max-width: 100%;}
 .widget p {margin-bottom: 0;}
 .widget-show {left: 0;}
-.widget-toggle {position: absolute;top: 0;right: -20px;font-style: normal;font-size: 10px;width: 20px;text-align: center;padding: 5px 0;background: #FF9800;color: #fff;}
+.widget-showList .widget-albumPic {-webkit-filter: blur(5px);}
+.widget-toggle {position: absolute;bottom: 20px;right: -20px;font-style: normal;font-size: 10px;width: 20px;text-align: center;padding: 5px 0;background: #FF9800;color: #fff;}
 .widget-title {width: 50%;height: 40px;line-height: 40px;font-size: 14px;text-align: center;overflow: hidden;}
 .widget-title em {white-space: nowrap;}
 .widget-title em.play {-webkit-animation: light linear 30s infinite;animation: light linear 30s infinite;position: relative;}
@@ -129,7 +133,7 @@ footer {padding: 30px;}
 .widget-tool a {margin-right: 3px;color: #333;}
 .widget-tool a:hover {border: none;}
 .widget-tool a.selected {color: #fff;}
-.widget-list {display: none;position: absolute;bottom: 100%;left: 0;width: 100%;padding-bottom: 10px;background: rgba(0,0,0,.5);color: #FF9800;width: 250px;max-height: 320px;overflow-y: auto;}
+.widget-list {display: none;position: absolute;bottom: 60px;left: 0;width: 100%;padding-bottom: 10px;background: rgba(0,0,0,.5);color: #FF9800;width: 250px;height: 240px;overflow-y: auto;}
 .widget-list .tool {text-align: right;padding: 5px;background: rgba(0,0,0,.3);}
 .widget-list .tool span {color: #fff;font-size: 12px;background: rgba(233, 30, 99,.8);display: inline-block;padding: 0 5px;line-height: 26px;cursor: pointer;transition: all linear .3s;}
 .widget-list .tool span:hover {background: rgba(233, 30, 99,1);}

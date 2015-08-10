@@ -10,7 +10,6 @@ var koa = require('koa'),
   queryString = require('querystring'),
   corequest = require('co-request'),
   crypto = require('crypto'),
-  sendfile = require('koa-sendfile'),
   app = koa()
 
 var song = function*() {

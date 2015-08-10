@@ -52,6 +52,12 @@
 				<i class="song-progress" ng-if="nowPlay === $index" style="-webkit-animation-duration: {{value.duration|getDuration}}s" ng-style="{'-webkit-animation-play-state': song.paused() ? 'paused':'running'}"></i>
 			</li>
 		</ul>
+		<div class="searching" ng-if="loading">
+			通信中。。。
+		</div>
+		<div class="blankResult" ng-if="noResult">
+			通信完毕，然而并没有获得任何结果。。。
+		</div>
 		<div class="loadmore" ng-click="loadMore()" ng-if="more">加载更多</div>
 	</div>
 </div>

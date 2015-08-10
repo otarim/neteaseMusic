@@ -220,7 +220,8 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			var m = {
 				name: music.name,
 				url: music.mp3Url || music.url,
-				duration: music.duration
+				duration: music.duration,
+				pic: music.pic || music.album.picUrl
 			}
 			var m_status = getStatus(data.playList, m.url)
 			if (m_status.index === -1) {
@@ -236,7 +237,8 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				return {
 					name: music.name,
 					url: music.mp3Url || music.url,
-					duration: music.duration
+					duration: music.duration,
+					pic: music.album.picUrl
 				}
 			})
 			data.playList = data.playList.concat(lists)
@@ -287,15 +289,24 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					searchBar = document.querySelector('.search-handler input'),
 					postRequest = function(cb) {
 						var restful = Restangular.all('search')
+						$scope.loading = true
+						$scope.noResult = false
 						restful.post({
 							s: $scope.searchItem,
 							type: $scope.selectedType,
 							offset: $scope.offset,
 							limit: 20
 						}).then(function(resp) {
+							$scope.loading = false
 							var type = alias[$scope.selectedType]
+							if (resp.result[type + 'Count'] === 0) {
+								return $scope.noResult = true
+							}
+							$scope.noResult = false
 							cb && cb(resp.result, type)
 						}, function(err) {
+							$scope.loading = false
+							$scope.noResult = true
 							console.log(err)
 						})
 					}
@@ -320,6 +331,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				}
 				$scope.search = function() {
 					if ($scope.searchItem) {
+						$scope.more = false
 						$scope.data = []
 						$scope.offset = 0
 						store.add('netease.searchItem', $scope.searchItem)

@@ -1,12 +1,12 @@
 {
-  "name": "netease",
+  "name": "neteaseMusic",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "网易云音乐 web 版",
+  "main": "netease.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --harmony netease.js"
   },
-  "author": "otarim",
+  "author": "otarim.com@gmail.com",
   "license": "ISC",
   "dependencies": {
     "co": "^4.5.4",
@@ -16,7 +16,6 @@
     "koa-error": "^1.1.3",
     "koa-logger": "^1.2.2",
     "koa-router": "^5.1.2",
-    "koa-sendfile": "^1.1.1",
     "koa-static-cache": "^3.1.1",
     "koa-swig": "^2.0.0",
     "mz": "^1.3.0",
