@@ -23,21 +23,22 @@ var song = function*() {
 
 var search = function*() {
   var body = this.request.body
-  this.body = yield request('/api/search/get/', 'post', {
+  this.body = yield request('/api/search/get/web', 'post', {
     's': body.s,
     'type': body.type || 1,
-    'offset': body.offset || 0,
-    'total': 'false',
-    'limit': 60
+    'offset': body.offset || 0, //分页起始位置，非分页页数
+    'total': false,
+    'limit': body.limit || 60
   })
 }
 
 var user = function*() {
   var query = this.request.query
   this.body = yield request('/api/user/playlist', 'get', {
-    offset: query.offset || 1,
-    limit: query.limit || 60,
-    uid: query.user
+    offset: query.offset || 0,
+    limit: query.limit || 9,
+    uid: query.user,
+    total: false
   })
 }
 
@@ -73,8 +74,10 @@ var playList = function*() {
 var getArtistAlbum = function*() {
   var query = this.request.query
   this.body = yield request('/api/artist/albums/' + query.id, 'get', {
+    id: query.id,
     offset: query.offset || 0,
-    limit: 60
+    total: false,
+    limit: query.limit || 20
   })
 }
 

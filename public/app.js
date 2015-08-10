@@ -23,6 +23,12 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			} else {
 				audio.pause()
 			}
+		},
+		audio: audio,
+		onEnd: function(cb) {
+			audio.addEventListener('ended', function() {
+				cb()
+			})
 		}
 	}
 }).provider('songListController', function() {
@@ -36,9 +42,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 
 		return function(type, $scope) {
 			var url = '/api/' + type + '?' + type + '='
-				// var restful = Restangular.all(type),
-				// 	queryParamas = {} 
-				// queryParamas[type] = $routeParams.id
 			$scope.song = song
 			$scope.changeRoute = changeRoute
 			$http.get(url + $routeParams.id).success(function(d) {
@@ -46,6 +49,11 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 					$scope.data = d.result
 				} else {
 					$scope.data = d
+				}
+				if (type === 'user') {
+					$scope.more = d.more
+					$scope['playlist'] = d.playlist
+					$scope.offset = d.playlist.length
 				}
 				$scope.toggleOrder = function(type) {
 					if ($scope.order === type) {
@@ -60,17 +68,47 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 					musicboxData.add(music)
 				}
 			}
+			$scope.playAll = function(lists) {
+				musicboxData.addPlayList(lists)
+			}
 			$scope.selectSong = function(index) {
 				$scope.index = index
 			}
-			if (type === 'artist') {
-				var api = Restangular.all('/artist/albums')
-				api.get('', {
-					id: $routeParams.id,
-					offset: 0
-				}).then(function(result) {
-					$scope.hotAlbums = result.hotAlbums
-				})
+			if (type === 'artist' || type === 'user') {
+				var prop
+				var api = type === 'artist' ? Restangular.all('/artist/albums') : Restangular.all('/user')
+				var fetch = function(cb) {
+					var params = {
+						offset: $scope.offset,
+						limit: 10
+					}
+					if (type === 'artist') {
+						params['id'] = $routeParams.id
+					} else {
+						params['user'] = $routeParams.id
+					}
+					api.get('', params).then(function(result) {
+						cb && cb(result)
+					})
+				}
+				$scope.offset = 0
+				$scope.loadMore = function() {
+					fetch(function(result) {
+						$scope.more = result.more
+						$scope[prop] = $scope[prop].concat(result[prop])
+						$scope.offset += result[prop].length
+					})
+				}
+				if (type === 'artist') {
+					prop = 'hotAlbums'
+					fetch(function(result) {
+						$scope.more = result.more
+						$scope[prop] = result[prop]
+						$scope.offset += result[prop].length
+					})
+				} else {
+					prop = 'playlist'
+				}
 			}
 		}
 	}
@@ -125,12 +163,13 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 		}
 	}
 }).factory('musicboxData', ['song', function(song) {
-	var store = {}
 	var data = {
 		playing: 'hi',
 		curIndex: 0,
 		play: false,
-		playList: []
+		playList: [],
+		current: null,
+		shuffle: false
 	}
 	var getStatus = function(data, dist) {
 		for (var i = 0, l = data.length; i < l; i++) {
@@ -146,6 +185,36 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			index: -1
 		}
 	}
+	var shuffle = function() {
+		data.curIndex = Math.floor(Math.random() * data.playList.length)
+		prePareSong(data.playList[data.curIndex])
+	}
+	var next = function() {
+		if (!data.shuffle) {
+			if (data.curIndex < data.playList.length - 1) {
+				prePareSong(data.playList[++data.curIndex])
+			}
+		} else {
+			shuffle()
+		}
+	}
+	var prev = function() {
+		if (!data.shuffle) {
+			if (data.curIndex > 0) {
+				prePareSong(data.playList[--data.curIndex])
+			}
+		} else {
+			shuffle()
+		}
+	}
+	var prePareSong = function(music) {
+		song.play(music.url)
+		data.playing = music.name
+		data.play = true
+		data.current = music
+		song.audio.currentTime = 0
+	}
+	song.onEnd(next)
 	return {
 		add: function(music) {
 			var m = {
@@ -157,15 +226,38 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			if (m_status.index === -1) {
 				data.playList.push(m)
 			}
-			data.playing = m.name
-			data.play = true
 			data.curIndex = m_status.curIndex
-			store[m.name] = m.url
-			song.play(m.url)
+			prePareSong(m)
 			return data
 		},
+		addPlayList: function(lists) {
+			console.log(lists)
+			lists = lists.map(function(music) {
+				return {
+					name: music.name,
+					url: music.mp3Url || music.url,
+					duration: music.duration
+				}
+			})
+			data.playList = data.playList.concat(lists)
+			prePareSong(lists[0])
+		},
+		next: next,
+		prev: prev,
 		getData: function() {
 			return data
+		},
+		toggleShuffle: function() {
+			data.shuffle = !data.shuffle
+		},
+		empty: function() {
+			song.audio.currentTime = 0
+			data.playList = []
+			data.playing = 'build by otarim'
+			data.curIndex = 0
+			data.play = false
+			data.current = null
+			song.pause()
 		}
 	}
 }])
@@ -198,7 +290,8 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 						restful.post({
 							s: $scope.searchItem,
 							type: $scope.selectedType,
-							offset: $scope.offset
+							offset: $scope.offset,
+							limit: 20
 						}).then(function(resp) {
 							var type = alias[$scope.selectedType]
 							cb && cb(resp.result, type)
@@ -211,7 +304,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					10: 'album',
 					100: 'artist',
 					1000: 'playlist',
-					1002: 'user'
+					1002: 'userprofile'
 				}
 				$scope.data = {}
 				$scope.type = type
@@ -228,21 +321,24 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				$scope.search = function() {
 					if ($scope.searchItem) {
 						$scope.data = []
-						$scope.offset = 1
+						$scope.offset = 0
 						store.add('netease.searchItem', $scope.searchItem)
 						postRequest(function(resp, type) {
 							$scope.data[type + 'Count'] = resp[type + 'Count']
 							$scope.data[type + 's'] = resp[type + 's']
+							$scope.offset += resp[type + 's'].length
+							$scope.more = $scope.offset < resp[type + 'Count']
 						})
 					} else {
 						searchBar.focus()
 					}
 				}
 				$scope.loadMore = function() {
-					$scope.offset += 1
 					postRequest(function(resp, type) {
-						$scope.data[type + 'Count'] += resp[type + 'Count']
+						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = $scope.data[type + 's'].concat(resp[type + 's'])
+						$scope.offset += resp[type + 's'].length
+						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
 				$scope.play = function(id, index) {
@@ -264,6 +360,8 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					postRequest(function(resp, type) {
 						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = resp[type + 's']
+						$scope.offset += resp[type + 's'].length
+						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
 			}],
@@ -305,46 +403,51 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 }]).controller('main', ['$scope', 'global', function($scope, global) {
 	$scope.global = global.getValue()
 }]).directive('musicbox', ['song', 'musicboxData', function(song, musicboxData) {
-	// Runs during compile
 	return {
-		// name: '',
-		// priority: 1,
-		// terminal: true,
-		// scope: {}, // {} = isolate, true = child, false/undefined = no change
 		controller: function($scope, $element, $attrs, $transclude) {
 			$scope.song = song
 			$scope.data = musicboxData.getData()
+			$scope.statusText = '展开'
 			$scope.play = function(music, index) {
-				if (song.nowPlaying === music.url) {
-					song.resume()
+				if ($scope.song.nowPlaying === music.url) {
+					$scope.song.resume()
 				} else {
 					// $scope.nowPlay = index
 					musicboxData.add(music)
 				}
-			}
-			$scope.selectSong = function(index) {
-				$scope.index = index
+				$scope.paused = song.paused()
 			}
 			$scope.toggleShow = function() {
-				$element.toggleClass('widget-show')
+				if ($scope.statusText === '收起') {
+					$scope.list = false
+					$scope.statusText = '展开'
+				} else {
+					$scope.statusText = '收起'
+				}
+				$scope.show = !$scope.show
 			}
 			$scope.showList = function() {
 				$scope.list = !$scope.list
 			}
+			$scope.playPrev = function() {
+				musicboxData.prev()
+			}
+			$scope.playNext = function() {
+				musicboxData.next()
+			}
+			$scope.toggleShuffle = function() {
+				musicboxData.toggleShuffle()
+			}
+			$scope.emptyList = function() {
+				musicboxData.empty()
+			}
+			setInterval(function() {
+				$scope.$apply()
+			}, 500)
 		},
-		// require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
 		restrict: 'EA', // E = Element, A = Attribute, C = Class, M = Comment
-		// template: '',
 		templateUrl: '/view/musicbox.tpl',
-		replace: true,
-		// transclude: true,
-		// compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
-		link: function($scope, iElm, iAttrs, controller) {
-			// iElm.find('i').on('click',function(){
-			// 	iElm.toggleClass('widget-show')
-			// })
-			// iElm.find()
-		}
+		replace: true
 	}
 }]).run(['$rootScope', 'global', function($rootScope, global) {
 	$rootScope.$on('$routeChangeStart', function(evt, next, current) {

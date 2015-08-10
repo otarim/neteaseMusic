@@ -16,6 +16,8 @@
   "dependencies": {
     "angular": "~1.4.3",
     "restangular": "~1.5.1",
-    "angular-route": "~1.4.3"
+    "angular-route": "~1.4.3",
+    "angular-media-player": "~0.5.8",
+    "font-awesome": "~4.4.0"
   }
 }

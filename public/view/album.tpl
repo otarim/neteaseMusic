@@ -7,12 +7,12 @@
 		</p>
 	</div>
 	<ul class="content-songs">
+		<li class="playAll" ng-click="playAll(data.album.songs)">播放全部</li>
 		<li class="caption">
 			<span class="song-index">&nbsp;</span><span class="song-title">歌名</span><span class="song-artist">艺术家</span><span class="song-time" ng-click="toggleOrder('duration')">时间</span><span class="song-score" ng-click="toggleOrder('score')">热度</span>
 		</li>
 		<li ng-repeat="(key, value) in data.album.songs | orderBy: order: rev" ng-dblclick="play(value,$index)" ng-click="selectSong($index)" ng-class="{active: index === $index,odd: $odd}">
 			<span class="song-index">{{$index+1}}</span><span class="song-title">{{value.name}}</span><span class="song-artist" ng-click="changeRoute('artist',{id: value.artists[0].id})">{{value.artists[0].name}}</span><span class="song-time">{{value.duration|formatTime}}</span><span class="song-score"><i><b ng-style="{width: value.score+'%'}"></b></i></span>
-			<i class="song-progress" ng-if="nowPlay === $index" style="-webkit-animation-duration: {{value.duration|getDuration}}s" ng-style="{'-webkit-animation-play-state': song.paused() ? 'paused':'running'}"></i>
 		</li>
 	</ul>
 </div>
