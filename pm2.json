@@ -1,0 +1,12 @@
+{
+  "name": "netease",
+  "script": "netease.js",
+  "node_args": "--harmony",
+  "merge_logs": true,
+  "cwd": "./",
+  "out_file": "./out.log",
+  "error_file": "./err.log",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

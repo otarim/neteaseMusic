@@ -10,6 +10,7 @@ var koa = require('koa'),
   queryString = require('querystring'),
   corequest = require('co-request'),
   crypto = require('crypto'),
+  favicon = require('koa-favicon'),
   app = koa()
 
 var song = function*() {
@@ -43,7 +44,6 @@ var user = function*() {
 
 var artist = function*() {
   var query = this.request.query
-  console.log('/api/artist/artist=' + query.artist)
   this.body = yield request('/api/artist/' + query.artist, 'get')
 }
 
@@ -89,6 +89,8 @@ if (process.env.NODE_ENV === 'development') {
 // app.use(require('koa-charset')())
 
 //app.use(require('koa-parameter')(app))
+
+app.use(favicon(__dirname + '/public/favicon.png')) //require staticPath
 
 app.use(staticServe('./public/', {
   maxAge: 365 * 24 * 60 * 60

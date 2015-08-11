@@ -33,7 +33,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 	}
 }).provider('songListController', function() {
 	// $scope,$http,$routeParams,song,changeRoute
-	this.$get = function($http, $routeParams, song, changeRoute, musicboxData, Restangular) {
+	this.$get = function($http, $routeParams, song, changeRoute, musicboxData, Restangular, global) {
 		// $get 接受依赖列表
 		// $scope 仅仅存在 controller 中
 		// provider 可以在 config 里面预定义
@@ -109,6 +109,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				} else {
 					prop = 'playlist'
 				}
+				global.reset()
 			}
 		}
 	}
@@ -329,7 +330,8 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					store.add('netease.setType', type)
 					searchBar.focus()
 				}
-				$scope.search = function() {
+				$scope.search = function(e) {
+					if (e && e.which !== 13) return
 					if ($scope.searchItem) {
 						$scope.more = false
 						$scope.data = []
@@ -364,7 +366,6 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				$scope.selectSong = function(index) {
 					$scope.select = index
 				}
-				global.reset()
 				if (!store.has('netease.setType')) {
 					store.add('netease.setType', '1')
 				}
@@ -379,6 +380,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
+				global.toggle()
 			}],
 			resolve: {
 				// 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)* must be fn

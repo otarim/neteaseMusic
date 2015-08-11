@@ -4,8 +4,8 @@
 			<a href="javascript:;" ng-repeat="(key,value) in type" ng-click="setType(key,$index)" ng-bind="value" ng-class="{active: index === $index}"></a>
  		</p>
 		<div class="search-handler">
-			<input type="text" name="" id="" ng-model="searchItem" ng-model-options="{updateOn: 'blur'}" autofocus placeholder="{{type[selectedType]}}">
-			<button class="btn-primary" ng-click="search()">search</button>
+			<input type="text" name="" id="" ng-model="searchItem" autofocus placeholder="{{type[selectedType]}}" ng-keyUp="search($event)">
+			<button class="btn-primary" ng-click="search()">一库</button>
 		</div>
 	</div>
 	<div class="result">
