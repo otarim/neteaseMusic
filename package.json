@@ -9,6 +9,7 @@
   "author": "otarim.com@gmail.com",
   "license": "ISC",
   "dependencies": {
+    "bower": "^1.4.1",
     "co": "^4.5.4",
     "co-request": "^1.0.0",
     "koa": "^0.20.0",
