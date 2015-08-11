@@ -366,7 +366,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				}
 				global.reset()
 				if (!store.has('netease.setType')) {
-					store.add('netease.setType', $scope.type['1'])
+					store.add('netease.setType', '1')
 				}
 				if (store.has('netease.searchItem')) {
 					$scope.searchItem = store.get('netease.searchItem')
