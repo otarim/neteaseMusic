@@ -15,7 +15,7 @@
 				<a href="" class="fa fa-fast-backward" ng-click="playPrev()"></a>
 				<a href="" class="fa" ng-class="{
 					'fa-play': paused,
-					'fa-stop': !paused
+					'fa-pause': !paused
 				}"ng-click="play(data.current,data.curIndex)"></a>
 				<a href="" class="fa fa-fast-forward" ng-click="playNext()"></a>
 				<a href="" class="fa fa-random" ng-class="{

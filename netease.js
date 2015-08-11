@@ -124,14 +124,19 @@ router.get('/api/song', song)
   .get('/api/artist', artist)
   .get('/api/album', album)
   .get('/api/playList', playList)
-  // .get('/api/playListDetail', playListDetail)
+  .get('/api/artist/albums', getArtistAlbum)
+  .post('/api/login', function*() {
+    var body = this.request.body
+    this.body = yield request('/api/login/', 'post', {
+      username: body.username,
+      password: crypto.createHash('md5').update(body.password).digest('hex'),
+      rememberLogin: true
+    })
+  })
   .get('/', function*() {
     this.body = yield this.render('index')
   })
-  .get('/test', function*() {
-    this.body = require('request')('http://m1.music.126.net/xTVT2QrGU8tttp0Apfgxqg==/5662484883124265.mp3')
-  })
-  .get('/api/artist/albums', getArtistAlbum)
+
 
 
 app.listen(9527)

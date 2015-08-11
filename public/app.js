@@ -109,7 +109,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				} else {
 					prop = 'playlist'
 				}
-				global.reset()
 			}
 		}
 	}
@@ -163,7 +162,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			global.classname = false
 		}
 	}
-}).factory('musicboxData', ['song', function(song) {
+}).factory('musicboxData', ['song', '$rootScope', function(song, $rootScope) {
 	var data = {
 		playing: 'hi',
 		curIndex: 0,
@@ -185,6 +184,13 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			curIndex: data.length,
 			index: -1
 		}
+	}
+	var notify = function() {
+		$rootScope.$emit('notify', {
+			body: data.current.name.length > 32 ? data.current.name.slice(0, 32) + '...' : data.current.name,
+			icon: data.current.pic,
+			tag: 1
+		})
 	}
 	var shuffle = function() {
 		data.curIndex = Math.floor(Math.random() * data.playList.length)
@@ -214,6 +220,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 		data.play = true
 		data.current = music
 		song.audio.currentTime = 0
+		notify()
 	}
 	song.onEnd(next)
 	return {
@@ -233,7 +240,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			return data
 		},
 		addPlayList: function(lists) {
-			console.log(lists)
 			lists = lists.map(function(music) {
 				return {
 					name: music.name,
@@ -426,6 +432,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 			$scope.data = musicboxData.getData()
 			$scope.statusText = '展开'
 			$scope.play = function(music, index) {
+				if (!$scope.data.current) return
 				if ($scope.song.nowPlaying === music.url) {
 					$scope.song.resume()
 				} else {
@@ -467,8 +474,20 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 		replace: true
 	}
 }]).run(['$rootScope', 'global', function($rootScope, global) {
+	Notification.requestPermission(function(permission) {
+		// 可在确认后直接弹出
+		if (permission === 'granted') {
+			$rootScope.$on('notify', function(e, notify) {
+				var notification = new Notification('当前播放:', notify)
+				notification.onshow = function() {
+					setTimeout(function() {
+						notification.close()
+					}, 2000)
+				}
+			})
+		}
+	})
 	$rootScope.$on('$routeChangeStart', function(evt, next, current) {
-		console.log(current)
 		global.reset()
 	})
 }])
