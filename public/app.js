@@ -370,9 +370,10 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					$scope.selectedType = store.get('netease.setType')
 					$scope.index = Object.keys($scope.type).indexOf($scope.selectedType)
 					postRequest(function(resp, type) {
+						type = $scope.selectedType
 						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = resp[type + 's']
-						$scope.offset = resp[type + 's'].length
+						$scope.offset += resp[type + 's'].length
 						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
