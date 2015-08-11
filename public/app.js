@@ -372,7 +372,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					postRequest(function(resp, type) {
 						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = resp[type + 's']
-						$scope.offset += resp[type + 's'].length
+						$scope.offset = resp[type + 's'].length
 						$scope.more = $scope.offset < resp[type + 'Count']
 					})
 				}
