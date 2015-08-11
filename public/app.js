@@ -365,12 +365,14 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 					$scope.select = index
 				}
 				global.reset()
+				if (!store.has('netease.setType')) {
+					store.add('netease.setType', $scope.type['1'])
+				}
 				if (store.has('netease.searchItem')) {
 					$scope.searchItem = store.get('netease.searchItem')
 					$scope.selectedType = store.get('netease.setType')
 					$scope.index = Object.keys($scope.type).indexOf($scope.selectedType)
 					postRequest(function(resp, type) {
-						type = $scope.selectedType
 						$scope.data[type + 'Count'] = resp[type + 'Count']
 						$scope.data[type + 's'] = resp[type + 's']
 						$scope.offset += resp[type + 's'].length
