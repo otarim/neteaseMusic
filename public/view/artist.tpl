@@ -20,10 +20,10 @@
 	<div class="albums">
 		<ul>
 			<li ng-if="hotAlbums.length" ng-repeat="(key, value) in hotAlbums" data-id="{{value.id}}">
-			<span class="album-wrap"><img ng-src="{{value.img1v1 === -1 ? value.img1v1Url : value.picUrl}}" alt="{{value.name}}" width="120" height="120" ng-click="changeRoute('album',{id: value.id})">
-			</span>
-			<span class="album-des"><h6 ng-bind="value.name" ng-click="changeRoute('album',{id: value.id})"></h6><p ng-click="changeRoute('artist',{id: value.artist.id})">{{value.artist.name}}</p></span>
-		</li>
+				<span class="album-wrap"><img ng-src="{{value.img1v1 === -1 ? value.img1v1Url : value.picUrl}}" alt="{{value.name}}" width="120" height="120" ng-click="changeRoute('album',{id: value.id})">
+				</span>
+				<span class="album-des"><h6 ng-bind="value.name" ng-click="changeRoute('album',{id: value.id})"></h6><p ng-click="changeRoute('artist',{id: value.artist.id})">{{value.artist.name}}</p></span>
+			</li>
 		</ul>
 		<div class="loadmore" ng-click="loadMore()" ng-if="more">加载更多</div>
 	</div>

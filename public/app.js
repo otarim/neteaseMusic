@@ -271,7 +271,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 	}
 }])
 
-var app = angular.module('app', ['ngRoute', 'service', 'restangular'])
+var app = angular.module('app', ['ngRoute', 'service', 'restangular', 'cfp.hotkeys'])
 
 app.filter('formatTime', function() {
 	return function(input) {
@@ -425,7 +425,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 		})
 }]).controller('main', ['$scope', 'global', function($scope, global) {
 	$scope.global = global.getValue()
-}]).directive('musicbox', ['song', 'musicboxData', function(song, musicboxData) {
+}]).directive('musicbox', ['song', 'musicboxData', 'hotkeys', function(song, musicboxData, hotkeys) {
 	return {
 		controller: function($scope, $element, $attrs, $transclude) {
 			$scope.song = song
@@ -465,6 +465,22 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 			$scope.emptyList = function() {
 				musicboxData.empty()
 			}
+			hotkeys.bindTo($scope).add({
+				combo: 'ctrl+shift+left',
+				callback: function() {
+					$scope.playPrev()
+				}
+			}).add({
+				combo: 'ctrl+shift+right',
+				callback: function() {
+					$scope.playNext()
+				}
+			}).add({
+				combo: 'ctrl+shift+space',
+				callback: function() {
+					$scope.song.resume()
+				}
+			})
 			setInterval(function() {
 				$scope.$apply()
 			}, 500)
@@ -478,9 +494,10 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 		// 可在确认后直接弹出
 		if (permission === 'granted') {
 			$rootScope.$on('notify', function(e, notify) {
+				clearTimeout(Notification.timmer)
 				var notification = new Notification('当前播放:', notify)
 				notification.onshow = function() {
-					setTimeout(function() {
+					Notification.timmer = setTimeout(function() {
 						notification.close()
 					}, 2000)
 				}
