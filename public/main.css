@@ -84,7 +84,7 @@ footer {padding: 30px;}
 .playList .active {background: #45AFA5;}
 .playList .song-title,.playList .song-artist,.playList .song-album {width: 20%;}
 .playlist {padding-top: 30px;}
-.playlist li,.users li {display: inline-block;width: 20%;vertical-align: top;cursor: pointer;}
+.playlist li,.users li {display: inline-block;width: 20%;vertical-align: top;cursor: pointer;margin-bottom: 10px;}
 .playlist li h6,.users li h6 {font-size: .15rem;line-height: .2rem;max-height: .4rem;overflow: hidden;margin: 5px .3rem;transition: background linear .3s;}
 .playlist li p {display: inline-block;padding: 0 .1rem;transition: background linear .3s;}
 .playlist li h6:hover,.playlist li p:hover {background: #555;color: #fff;}
