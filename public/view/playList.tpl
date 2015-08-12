@@ -2,7 +2,7 @@
 	<div class="header-info">
 		<img ng-src="{{data.coverImgUrl}}" alt="">
 		<h2 ng-bind="data.name"></h2>
-		<p ng-bind="data.creator.signature"></p>
+		<p ng-bind="data.description"></p>
 	</div>
 	<ul class="content-songs">
 		<li class="playAll" ng-click="playAll(data.tracks)">播放全部</li>

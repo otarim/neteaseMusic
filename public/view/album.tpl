@@ -1,9 +1,8 @@
 <div class="album">
 	<div class="header-info">
-		<img ng-src="{{data.album.img1v1 === -1 ? data.album.img1v1Url : data.album.picUrl}}" alt="">
+		<img ng-src="{{data.album.picUrl || data.album.img1v1Url}}" alt="">
 		<h2 ng-bind="data.album.name"></h2>
-		<p>
-			<span ng-repeat="(key, value) in data.album.alias">{{value}}</span>
+		<p ng-bind="data.album.description">
 		</p>
 	</div>
 	<ul class="content-songs">

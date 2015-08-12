@@ -1,9 +1,8 @@
 <div class="artist">
 	<div class="header-info">
-		<img ng-src="{{data.artist.img1v1 === -1 ? data.artist.img1v1Url : data.artist.picUrl}}" alt="">
+		<img ng-src="{{data.artist.picUrl || data.artist.img1v1Url}}" alt="">
 		<h2 ng-bind="data.artist.name"></h2>
-		<p>
-			<span ng-repeat="(key, value) in data.artist.alias">{{value}}</span>
+		<p ng-bind="data.artist.trans">
 		</p>
 	</div>
 	<h4>热门歌曲:</h4>
