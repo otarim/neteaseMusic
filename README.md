@@ -4,7 +4,7 @@
 
 **地址**
 
-[http://www.misaka.me/](http://www.misaka.me/)
+[http://music.otar.im/](http://music.otar.im/)
 
 如果访问太慢可以用[http://112.74.100.145:9527/](http://112.74.100.145:9527/),因为阿里云域名绑定需要备案，所以我现在将域名绑定在另外一台海外vps然后指向阿里云的vps，中间的网络亏损确实比较大。
 
