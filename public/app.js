@@ -63,7 +63,6 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				}
 			})
 			$scope.play = function(music, index) {
-				music.mp3Url = music.mp3Url.replace(/m([0-9])\./,'p$1.')
 				if (song.nowPlaying !== music.mp3Url) {
 					musicboxData.add(music)
 				}
@@ -222,12 +221,16 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 		song.audio.currentTime = 0
 		notify()
 	}
+	var compactSong = function(music) {
+		var url = music.mp3Url || music.url
+		return url.replace(/m([0-9])\./,'p$1.')
+	}
 	song.onEnd(next)
 	return {
 		add: function(music) {
 			var m = {
 				name: music.name,
-				url: music.mp3Url || music.url,
+				url: compactSong(music),
 				duration: music.duration,
 				pic: music.pic || music.album.picUrl
 			}
@@ -243,7 +246,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 			lists = lists.map(function(music) {
 				return {
 					name: music.name,
-					url: music.mp3Url || music.url,
+					url: compactSong(music),
 					duration: music.duration,
 					pic: music.album.picUrl
 				}
@@ -363,7 +366,6 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				}
 				$scope.play = function(id, index) {
 					$http.get('/api/song?id=' + id).success(function(d) {
-						d.songs[0].mp3Url = d.songs[0].mp3Url.replace(/m([0-9])\./,'p$1.')
 						if (song.nowPlaying !== d.songs[0].mp3Url) {
 							musicboxData.add(d.songs[0])
 						}
