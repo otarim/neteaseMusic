@@ -63,7 +63,7 @@ service.config(['RestangularProvider', function(RestangularProvider) {
 				}
 			})
 			$scope.play = function(music, index) {
-				// music.mp3Url = music.mp3Url.replace('m1','m2')
+				music.mp3Url = music.mp3Url.replace(/m([0-9])\./,'p$1.')
 				if (song.nowPlaying !== music.mp3Url) {
 					musicboxData.add(music)
 				}
@@ -363,7 +363,7 @@ app.config(['$routeProvider', '$httpProvider', '$sceDelegateProvider', 'songList
 				}
 				$scope.play = function(id, index) {
 					$http.get('/api/song?id=' + id).success(function(d) {
-						// d.songs[0].mp3Url = d.songs[0].mp3Url.replace('m1','m2')
+						d.songs[0].mp3Url = d.songs[0].mp3Url.replace(/m([0-9])\./,'p$1.')
 						if (song.nowPlaying !== d.songs[0].mp3Url) {
 							musicboxData.add(d.songs[0])
 						}
