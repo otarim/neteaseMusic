@@ -159,7 +159,6 @@ var request = function*(api, method, data) {
       options.form = data
     }
   }
-  console.log(options)
   var req = yield corequest(options)
   return JSON.parse(req.body)
 }
