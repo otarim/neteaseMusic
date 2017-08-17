@@ -1,5 +1,7 @@
 # neteaseMusic(又是一个网易客户端)
 
+[http://music.otar.im/](http://music.otar.im/)
+
 **功能**
 
 1. 支持歌单，单曲，专辑，艺人，用户搜索
